@@ -1,0 +1,34 @@
+FROM nousresearch/hermes-agent:latest
+
+USER root
+
+# System tools for development, automation, git workflows
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssh-client \
+    curl \
+    wget \
+    jq \
+    ca-certificates \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/
+# GitHub CLI
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+    | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+    | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends gh \
+    && rm -rf /var/lib/apt/lists/
+
+# Python extras via uv (into the existing venv)
+RUN uv pip install --python /opt/hermes/.venv/bin/python3 \
+    pygount \
+    jupyterlab \
+    youtube-transcript-api \
+    "markitdown[pptx]" \
+    Pillow \
+    python-docx \
+    paramiko
+
+USER hermes
