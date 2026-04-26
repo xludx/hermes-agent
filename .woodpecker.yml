@@ -14,6 +14,9 @@ steps:
       password:
         from_secret: registry_password
       tags: latest
+      platforms:
+        - linux/amd64
+        - linux/arm64
 
   build-custom:
     image: woodpeckerci/plugin-docker-buildx
@@ -26,9 +29,9 @@ steps:
         from_secret: registry_password
       tags: custom
       dockerfile: Dockerfile.custom
-      #build_args:
-      #  - USER_UID=1000
-      #  - USER_GID=1000
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on:
       - build-base
     when:
