@@ -1,0 +1,45 @@
+when:
+  - event: push
+    branch: main
+  - event: manual
+
+steps:
+  build-base:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: registry.kcolb.com/ludx/hermes-agent
+      registry: registry.kcolb.com
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+      tags: latest
+
+  build-custom:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: registry.kcolb.com/ludx/hermes-agent
+      registry: registry.kcolb.com
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+      tags: custom
+      dockerfile: Dockerfile.custom
+      #build_args:
+      #  - USER_UID=1000
+      #  - USER_GID=1000
+    depends_on:
+      - build-base
+    when:
+      event: [push, manual]
+
+  #notify-dockhand:
+  #  image: curlimages/curl:latest
+  #  commands:
+  #    - curl -X POST https://dockhand.kcolb.com/api/git/stacks/38/webhook
+  #  when:
+  #    event: push
+  #    branch: main
+  #  depends_on:
+  #    - build-custom
