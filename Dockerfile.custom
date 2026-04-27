@@ -42,4 +42,4 @@ RUN if ! getent passwd "$TARGET_UID" >/dev/null 2>&1; then \
       echo "hermes:x:${TARGET_UID}:${TARGET_UID}::/opt/data:/bin/sh" >> /etc/passwd; \
     fi
 
-USER hermes
+USER root
