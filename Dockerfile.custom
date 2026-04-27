@@ -31,4 +31,15 @@ RUN uv pip install --python /opt/hermes/.venv/bin/python3 \
     python-docx \
     paramiko
 
+# Support running under arbitrary UIDs (e.g. macOS UID 501).
+# OpenSSH's getpwuid() requires a valid /etc/passwd entry for the running UID.
+# The upstream entrypoint (docker/entrypoint.sh) handles this via HERMES_UID
+# env var when the container starts as root — it runs usermod + gosu.
+# This fallback ensures SSH works even if the entrypoint gosu flow is bypassed
+# (e.g. docker-compose user: directive) or when running the image directly.
+ARG TARGET_UID=501
+RUN if ! getent passwd "$TARGET_UID" >/dev/null 2>&1; then \
+      echo "hermes:x:${TARGET_UID}:${TARGET_UID}::/opt/data:/bin/sh" >> /etc/passwd; \
+    fi
+
 USER hermes
