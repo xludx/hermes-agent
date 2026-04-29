@@ -5274,12 +5274,20 @@ def _warn_stale_dashboard_processes() -> None:
 
     try:
         if sys.platform == "win32":
+            # wmic may emit text in the system code page (for example cp936
+            # on zh-CN systems), not UTF-8. In text mode, subprocess output
+            # decoding depends on Python's configuration (locale-dependent
+            # by default, or UTF-8 in UTF-8 mode). The important protection
+            # here is errors="ignore": it prevents a reader-thread
+            # UnicodeDecodeError from leaving result.stdout=None and turning
+            # the later .split() into an AttributeError (#17049).
             result = subprocess.run(
                 ["wmic", "process", "get", "ProcessId,CommandLine",
                  "/FORMAT:LIST"],
                 capture_output=True, text=True, timeout=10,
+                encoding="utf-8", errors="ignore",
             )
-            if result.returncode != 0:
+            if result.returncode != 0 or result.stdout is None:
                 return
             current_cmd = ""
             for line in result.stdout.split("\n"):
@@ -9229,6 +9237,26 @@ Examples:
             cmd_info["setup_fn"](plugin_parser)
     except Exception as _exc:
         logging.getLogger(__name__).debug("Plugin CLI discovery failed: %s", _exc)
+
+    # =========================================================================
+    # curator command — background skill maintenance
+    # =========================================================================
+    curator_parser = subparsers.add_parser(
+        "curator",
+        help="Background skill maintenance (curator) — status, run, pause, pin",
+        description=(
+            "The curator is an auxiliary-model background task that "
+            "periodically reviews agent-created skills, prunes stale ones, "
+            "consolidates overlaps, and archives obsolete skills. "
+            "Bundled and hub-installed skills are never touched. "
+            "Archives are recoverable; auto-deletion never happens."
+        ),
+    )
+    try:
+        from hermes_cli.curator import register_cli as _register_curator_cli
+        _register_curator_cli(curator_parser)
+    except Exception as _exc:
+        logging.getLogger(__name__).debug("curator CLI wiring failed: %s", _exc)
 
     # =========================================================================
     # memory command
