@@ -26,7 +26,7 @@ steps:
   notify-dockhand-rutherford:
     image: curlimages/curl:latest
     commands:
-      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/38/webhook
+      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/45/webhook
     when:
       event: [push, cron]
     depends_on:
@@ -35,7 +35,7 @@ steps:
   notify-dockhand-dolores:
     image: curlimages/curl:latest
     commands:
-      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/39/webhook
+      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/47/webhook
     when:
       event: [push, cron]
     depends_on:
