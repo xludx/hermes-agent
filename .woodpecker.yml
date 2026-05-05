@@ -1,23 +1,9 @@
 when:
   - event: push
-    branch: main
+    branch: custom
   - event: manual
 
 steps:
-  build-base:
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      repo: registry.kcolb.com/ludx/hermes-agent
-      registry: registry.kcolb.com
-      username:
-        from_secret: registry_username
-      password:
-        from_secret: registry_password
-      tags: latest
-      platforms:
-        - linux/amd64
-        - linux/arm64
-
   build-custom:
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -32,8 +18,6 @@ steps:
       platforms:
         - linux/amd64
         - linux/arm64
-    depends_on:
-      - build-base
     when:
       event: [push, manual]
 
