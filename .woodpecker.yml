@@ -2,6 +2,8 @@ when:
   - event: push
     branch: custom
   - event: manual
+  - event: cron
+    cron: "0 4 * * 1"
 
 steps:
   build-custom:
@@ -19,14 +21,22 @@ steps:
         - linux/amd64
         - linux/arm64
     when:
-      event: [push, manual]
+      event: [push, manual, cron]
 
-  #notify-dockhand:
-  #  image: curlimages/curl:latest
-  #  commands:
-  #    - curl -X POST https://dockhand.kcolb.com/api/git/stacks/38/webhook
-  #  when:
-  #    event: push
-  #    branch: main
-  #  depends_on:
-  #    - build-custom
+  notify-dockhand-rutherford:
+    image: curlimages/curl:latest
+    commands:
+      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/38/webhook
+    when:
+      event: [push, cron]
+    depends_on:
+      - build-custom
+
+  notify-dockhand-dolores:
+    image: curlimages/curl:latest
+    commands:
+      - curl -X POST https://dockhand.kcolb.com/api/git/stacks/39/webhook
+    when:
+      event: [push, cron]
+    depends_on:
+      - build-custom
